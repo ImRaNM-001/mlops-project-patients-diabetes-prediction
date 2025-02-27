@@ -1,1 +1,58 @@
-# stages:
+stages:
+  data_ingestion:
+    cmd: python src/data/make_dataset.py
+    deps:
+    - data/external/*.csv
+    - src/data/make_dataset.py
+    params:
+    - make_dataset.test_size
+    - make_dataset.random_state
+    - make_dataset.column_names
+    outs:
+    - data/interim/*.csv
+
+  data_preprocessing:
+    cmd: python src/data/process_dataset.py
+    deps:
+    - data/interim/*.csv
+    - src/data/process_dataset.py
+    params:
+    - process_dataset.column_name
+    outs:
+    - data/interim/*.csv
+
+  feature_engineering:
+    cmd: python src/features/build_features.py
+    deps:
+    - data/interim/*.csv
+    - src/features/build_features.py
+    outs:
+    - data/processed/*.csv
+
+  model_building:
+    cmd: python src/models/train_model.py
+    deps:
+    - data/processed/*.csv
+    - src/models/train_model.py
+    params:
+    - train_model.n_estimators
+    - train_model.max_features
+    - train_model.max_depth
+    - train_model.max_samples
+    - train_model.verbose
+    - train_model.random_state
+    - train_model.n_jobs
+    - train_model.min_samples_split
+    - train_model.min_samples_leaf
+    outs:
+    - models/rfclf_model.joblib
+
+  model_evaluation:
+    cmd: python src/models/predict_model.py
+    deps:
+    - models/rfclf_model.joblib
+    - src/models/predict_model.py
+    metrics:
+    - reports/metrics.json
+
+    

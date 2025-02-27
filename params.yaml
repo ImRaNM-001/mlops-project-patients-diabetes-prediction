@@ -1,8 +1,28 @@
+make_dataset:
+  test_size: 0.3
+  random_state: 42
+  column_names:
+  - Pregnancies
+  - Glucose
+  - BloodPressure
+  - SkinThickness
+  - Insulin
+  - BMI
+  - DiabetesPedigreeFunction
+  - Age
+  - Outcome
 
+process_dataset:
+  column_name:
+  - Insulin
 
-
-
-
-
-
-
+train_model:
+  n_estimators: 120
+  max_features: 0.2
+  max_depth: 8
+  max_samples: 0.75
+  verbose: 2
+  random_state: 42
+  n_jobs: -1
+  min_samples_split: 2
+  min_samples_leaf: 1
