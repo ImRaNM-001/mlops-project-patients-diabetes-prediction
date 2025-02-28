@@ -2,38 +2,39 @@ stages:
   data_ingestion:
     cmd: python src/data/make_dataset.py
     deps:
-    - data/external/*.csv
     - src/data/make_dataset.py
+    - data/external/pima-indians-diabetes.csv
     params:
     - make_dataset.test_size
     - make_dataset.random_state
     - make_dataset.column_names
     outs:
-    - data/interim/*.csv
+    - data/interim/train_data.csv
+    - data/interim/test_data.csv
 
   data_preprocessing:
     cmd: python src/data/process_dataset.py
     deps:
-    - data/interim/*.csv
     - src/data/process_dataset.py
+    - data/interim/train_data.csv
     params:
     - process_dataset.column_name
-    outs:
-    - data/interim/*.csv
 
   feature_engineering:
     cmd: python src/features/build_features.py
     deps:
-    - data/interim/*.csv
     - src/features/build_features.py
+    - data/interim/train_data.csv
+    - data/interim/test_data.csv
     outs:
-    - data/processed/*.csv
+    - data/processed/train_df_processed.csv
+    - data/processed/test_df_processed.csv
 
   model_building:
     cmd: python src/models/train_model.py
     deps:
-    - data/processed/*.csv
     - src/models/train_model.py
+    - data/processed/train_df_processed.csv
     params:
     - train_model.n_estimators
     - train_model.max_features
@@ -50,8 +51,9 @@ stages:
   model_evaluation:
     cmd: python src/models/predict_model.py
     deps:
-    - models/rfclf_model.joblib
     - src/models/predict_model.py
+    - data/processed/test_df_processed.csv    
+    - models/rfclf_model.joblib
     metrics:
     - reports/metrics.json
 
