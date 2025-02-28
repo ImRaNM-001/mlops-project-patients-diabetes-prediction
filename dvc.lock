@@ -1,0 +1,122 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/data/make_dataset.py
+    deps:
+    - path: data/external/pima-indians-diabetes.csv
+      hash: md5
+      md5: 56a8d8ae619fcc223941e54f361b8406
+      size: 23278
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: 1b0847ba8efa2fb19e4a79500faa39c2
+      size: 2285
+    params:
+      params.yaml:
+        make_dataset.column_names:
+        - Pregnancies
+        - Glucose
+        - BloodPressure
+        - SkinThickness
+        - Insulin
+        - BMI
+        - DiabetesPedigreeFunction
+        - Age
+        - Outcome
+        make_dataset.random_state: 42
+        make_dataset.test_size: 0.3
+    outs:
+    - path: data/interim/test_data.csv
+      hash: md5
+      md5: 43f6ff887740528e9ebdd444b2f3a6d5
+      size: 7055
+    - path: data/interim/train_data.csv
+      hash: md5
+      md5: 479128e488a31ac4eaaf3b3bdfabe476
+      size: 16332
+  data_preprocessing:
+    cmd: python src/data/process_dataset.py
+    deps:
+    - path: data/interim/train_data.csv
+      hash: md5
+      md5: 479128e488a31ac4eaaf3b3bdfabe476
+      size: 16332
+    - path: src/data/process_dataset.py
+      hash: md5
+      md5: d0e889d34eeaadcedd8d832a1594f5e3
+      size: 1712
+    params:
+      params.yaml:
+        process_dataset.column_name:
+        - Insulin
+  feature_engineering:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: data/interim/test_data.csv
+      hash: md5
+      md5: 43f6ff887740528e9ebdd444b2f3a6d5
+      size: 7055
+    - path: data/interim/train_data.csv
+      hash: md5
+      md5: 479128e488a31ac4eaaf3b3bdfabe476
+      size: 16332
+    - path: src/features/build_features.py
+      hash: md5
+      md5: c052f76efe55b255a6db02493f0e1fb6
+      size: 3329
+    outs:
+    - path: data/processed/test_df_processed.csv
+      hash: md5
+      md5: 1cadb2db60153952384366f27310dd43
+      size: 41070
+    - path: data/processed/train_df_processed.csv
+      hash: md5
+      md5: e116ce40f9a3410bb421812e7922fdfb
+      size: 88188
+  model_building:
+    cmd: python src/models/train_model.py
+    deps:
+    - path: data/processed/train_df_processed.csv
+      hash: md5
+      md5: e116ce40f9a3410bb421812e7922fdfb
+      size: 88188
+    - path: src/models/train_model.py
+      hash: md5
+      md5: f95ab823011e886b4809a900576a5002
+      size: 6830
+    params:
+      params.yaml:
+        train_model.max_depth: 8
+        train_model.max_features: 0.2
+        train_model.max_samples: 0.75
+        train_model.min_samples_leaf: 1
+        train_model.min_samples_split: 2
+        train_model.n_estimators: 120
+        train_model.n_jobs: -1
+        train_model.random_state: 42
+        train_model.verbose: 2
+    outs:
+    - path: models/rfclf_model.joblib
+      hash: md5
+      md5: 2a5c8cfe9c36195f3d44adfd0fffb209
+      size: 1060025
+  model_evaluation:
+    cmd: python src/models/predict_model.py
+    deps:
+    - path: data/processed/test_df_processed.csv
+      hash: md5
+      md5: 1cadb2db60153952384366f27310dd43
+      size: 41070
+    - path: models/rfclf_model.joblib
+      hash: md5
+      md5: 2a5c8cfe9c36195f3d44adfd0fffb209
+      size: 1060025
+    - path: src/models/predict_model.py
+      hash: md5
+      md5: d0d8d38c155b2a16bdc44aeff7b07ecd
+      size: 3833
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: da67917bb0a765efcbe32d6daece068c
+      size: 164
