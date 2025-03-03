@@ -1,5 +1,5 @@
-/models
-reports
+models/
+reports/
 
 # Byte-compiled / optimized / DLL files-outside
 __pycache__/
