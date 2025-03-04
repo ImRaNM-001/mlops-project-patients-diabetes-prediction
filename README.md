@@ -102,7 +102,6 @@ mlops-project-patients-diabetes-prediction/ ├── data/ # Data files and dat
 5. **Install DVC**:
     ```sh
    pip install dvc
-    dvc init
 6. **Install Airflow**:
     ```sh
    pip install apache-airflow   
@@ -120,8 +119,21 @@ mlops-project-patients-diabetes-prediction/ ├── data/ # Data files and dat
    
 2. **Run DVC commands**:
     ```sh   
-   . Pull the latest data and models.
-        dvc pull
+   . Initialize DVC at first.
+        dvc init
+
+    . Connect to a remote server (ex: DagsHub or Amazon S3)
+        dvc remote add origin s3://dvc
+        dvc remote modify origin endpointurl https://dagshub.com/ImRaNM-001/mlflow-experiment-hp-tuning.s3
+
+    . View list of remotes.
+        dvc remote list
+
+    . Pull data and models.
+        dvc pull -r origin
+
+    . Pull data and models.
+        dvc push -r origin
 3. **Run Airflow**:
     ```sh   
    . Initialize the Airflow database.
