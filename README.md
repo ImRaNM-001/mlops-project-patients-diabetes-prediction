@@ -26,7 +26,6 @@ The goal of this project is to build a machine learning model to predict diabete
 
 ## Project Structure
 
-mlops-project-patients-diabetes-prediction/ ├── data/ # Data files and datasets ├── dags/ # Airflow DAGs for workflow orchestration ├── models/ # Trained models and model artifacts ├── notebooks/ # Jupyter notebooks for exploration and experimentation ├── scripts/ # Python scripts for data processing and model training ├── .dvc/ # DVC configuration and cache ├── .github/ # GitHub Actions workflows ├── Dockerfile # Dockerfile for containerizing the application ├── requirements.txt # Python dependencies ├── README.md # Project documentation └── mlflow_project/ # MLflow project files
 
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
@@ -134,17 +133,7 @@ mlops-project-patients-diabetes-prediction/ ├── data/ # Data files and dat
 
     . Pull data and models.
         dvc push -r origin
-3. **Run Airflow**:
-    ```sh   
-   . Initialize the Airflow database.
-        airflow db init
-
-    . Start the Airflow web server and scheduler.
-        airflow webserver --port 8080
-        airflow scheduler
-
-    . Access the Airflow UI at http://127.0.0.1:8080.
-4. **Build and run the Docker container**:
+3. **Build and run the Docker container**:
     ```sh   
     docker build -t mlops-project .
     docker run -p 5000:5000 mlops-project                
