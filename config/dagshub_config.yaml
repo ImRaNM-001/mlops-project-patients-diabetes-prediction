@@ -1,0 +1,3 @@
+DAGSHUB_REPO_OWNER: ImRaNM-001
+DAGSHUB_REPO_NAME: mlflow-experiment-hp-tuning
+EXPERIMENT_NAME: RandomForest-BayesianOpt-DiabetesPrediction

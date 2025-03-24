@@ -5,6 +5,7 @@ import json
 import joblib as jb
 import numpy as np
 import pandas as pd
+import mlflow as mfl
 from pathlib import Path
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
@@ -96,6 +97,9 @@ def main() -> None:
                                  right = False)
 
         metrics = evaluate_model(model, X_test, y_test)
+        with mfl.start_run(run_name = 'best_model') as best_model:       
+            mfl.log_metric(metrics)
+
         save_metrics(metrics, get_root_path() / 'reports/metrics.json')
 
     except Exception as exception:

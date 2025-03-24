@@ -57,4 +57,9 @@ stages:
     metrics:
     - reports/metrics.json
 
-    
+  model_registration:
+    cmd: python src/models/register_model.py
+    deps:
+    - src/models/register_model.py
+    - reports/metrics.json    
+    - models/rfclf_model.joblib

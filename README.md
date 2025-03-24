@@ -10,7 +10,6 @@ This MLOps project aims to perform hyper-parameter tuning and log each experimen
 - [Usage](#usage)
 - [Experiments Tracking](#experiments-tracking)
 - [Data Versioning](#data-versioning)
-- [Workflow Orchestration](#workflow-orchestration)
 - [Dockerization](#dockerization)
 - [Contributing](#contributing)
 - [License](#license)
@@ -83,16 +82,16 @@ The goal of this project is to build a machine learning model to predict diabete
 
 2. **Create and activate a virtual environment**:
    ```sh
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate    # On Windows, use .venv\Scripts\activate  
 
 3. **Install the required dependencies**:
     ```sh
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    
 4. **Set up project structure using CookieCutter template**:
     ```sh
-   pip install cookiecutter
+   pip3 install cookiecutter
    
    cookiecutter https://github.com/drivendataorg/cookiecutter-data-science -c v1
 
@@ -101,10 +100,7 @@ The goal of this project is to build a machine learning model to predict diabete
 5. **Install DVC**:
     ```sh
    pip install dvc
-6. **Install Airflow**:
-    ```sh
-   pip install apache-airflow   
-7. **Install Docker**: 
+6. **Install Docker**: 
     ```sh
     To install Docker on your machine, follow the instructions on the,
 ### [Docker website](https://docs.docker.com/get-docker)
@@ -135,8 +131,8 @@ The goal of this project is to build a machine learning model to predict diabete
         dvc push -r origin
 3. **Build and run the Docker container**:
     ```sh   
-    docker build -t mlops-project .
-    docker run -p 5000:5000 mlops-project                
+    docker build -t mlops-project-patients-diabetes-prediction:v1 .
+    docker run -p 5000:5000 mlops-project-patients-diabetes-prediction:v1           
 ## Experiments Tracking
     . Use MLflow to track experiments, log metrics, and manage models.
     
@@ -146,11 +142,6 @@ The goal of this project is to build a machine learning model to predict diabete
     . Use DVC to version control data and manage data pipelines.
     
     . Track changes to datasets and ensure reproducibility of experiments.
-
-## Workflow Orchestration
-    . Use Airflow to orchestrate and schedule workflows.
-    
-    . Define DAGs (Directed Acyclic Graphs) to automate data processing and model training pipelines
 
 ## Dockerization
     . Use Docker to containerize the application and ensure consistent environments.
@@ -169,7 +160,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **Usage**: Explains how to run the MLflow server, DVC commands, Airflow, and Docker container.
 - **Experiments Tracking**: Describes how to use MLflow for tracking experiments.
 - **Data Versioning**: Describes how to use DVC for data versioning.
-- **Workflow Orchestration**: Describes how to use Airflow for workflow orchestration.
 - **Dockerization**: Describes how to use Docker for containerization.
 - **Contributing**: Provides information on how to contribute to the project.
 - **License**: Specifies the license for the project.
