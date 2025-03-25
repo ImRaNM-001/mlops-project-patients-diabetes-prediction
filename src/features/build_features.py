@@ -75,7 +75,7 @@ def main() -> None:
 
     except Exception as exception:
         logger.error('Failed to complete the feature engineering process: %s', exception)
-        print(f'Exception: {exception}')
+        raise
 
 if __name__ == '__main__':
     main()

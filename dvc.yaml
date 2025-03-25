@@ -5,6 +5,7 @@ stages:
     - src/data/make_dataset.py
     - data/external/pima-indians-diabetes.csv
     params:
+    - make_dataset.data_source_url
     - make_dataset.test_size
     - make_dataset.random_state
     - make_dataset.column_names
@@ -52,14 +53,16 @@ stages:
     cmd: python src/models/predict_model.py
     deps:
     - src/models/predict_model.py
+    # - data/processed/train_df_processed.csv
     - data/processed/test_df_processed.csv    
     - models/rfclf_model.joblib
     metrics:
     - reports/metrics.json
+    outs:
+    - reports/experiment_info.json
 
   model_registration:
     cmd: python src/models/register_model.py
     deps:
     - src/models/register_model.py
-    - reports/metrics.json    
-    - models/rfclf_model.joblib
+    - reports/experiment_info.json

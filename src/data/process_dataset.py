@@ -37,7 +37,7 @@ def main() -> None:
     
     except Exception as exception:
         logger.error('Failed to complete the data preprocessing: %s', exception)
-        print(f'Exception: {exception}')
+        raise
 
 
 if __name__ == '__main__':

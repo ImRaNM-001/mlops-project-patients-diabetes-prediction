@@ -10,45 +10,16 @@ from pathlib import Path
 from optuna import Study
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 
 sys.path.append(str(Path(__file__).parent.parent.parent))           # appends system root path as string
 from src.data.data_loader import get_root_path, log_message, load_params, load_data
+from src.utils.mlflow_utils import setup_mlflow
 
 # calling the logging function
 logger: logging.Logger = log_message('train_model', 'train_model.log')
 
-# Localhost execution:
-# import dagshub as dgb
-# from dotenv import load_dotenv
-# try:
-#     load_dotenv()
-#     repo_owner: str | None = os.getenv('DAGSHUB_REPO_OWNER')
-#     repo_name: str | None = os.getenv('DAGSHUB_REPO_NAME')
-
-# except ValueError as error:
-#     logger.error(str(error))
-
-# Initialize Dagshub
-# dgb.init(repo_owner = repo_owner, 
-#              repo_name = repo_name,
-#              mlflow = True)
-
-# Load the dagshub configurations
-dagshub_configs: dict[str, str | int] = load_params(get_root_path() / 'config/dagshub_config.yaml') 
-
-repo_owner: str = dagshub_configs['DAGSHUB_REPO_OWNER']
-repo_name: str = dagshub_configs['DAGSHUB_REPO_NAME']
-
-# Retrieve the token
-dagshub_token = os.getenv('DAGSHUB_TOKEN')
-if not dagshub_token:
-    raise EnvironmentError('DAGSHUB_TOKEN environment variable is not set')
-
-# Set multiple environment variables with the same value
-for env_var in ['MLFLOW_TRACKING_USERNAME', 'MLFLOW_TRACKING_PASSWORD']:
-    os.environ[env_var] = dagshub_token
-
+# Authenticating with dagshub and using the mlflow experiment created in "mlflow_utils"
+setup_mlflow()
 
 def train_model(X_train: np.ndarray, y_train: np.ndarray, params: dict[str, int]) -> RandomForestClassifier:
     """
@@ -105,40 +76,15 @@ def main() -> None:
     try:
         # Load the parameters
         params: dict[str, str | int] = load_params(get_root_path() / 'params.yaml') 
-        
-        # set the model training parameters 
-        # best_params_1: dict[str, int] = {
-        #                     'n_estimators': params['train_model']['n_estimators'],
-        #                     'max_features': params['train_model']['max_features'],
-        #                     'max_depth': params['train_model']['max_depth'],
-        #                     'max_samples': params['train_model']['max_samples'],
-        #                     'verbose': params['train_model']['verbose'],
-        #                     'random_state': params['train_model']['random_state'],
-        #                     'n_jobs': params['train_model']['n_jobs'],
-        #                     'min_samples_split': params['train_model']['min_samples_split'],
-        #                     'min_samples_leaf': params['train_model']['min_samples_leaf'],
-        #                 }
-     
-        # from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
-# Disabled local uri due to connection made to dagshub
-# if not mfl.is_tracking_uri_set():
-#     mfl.set_tracking_uri(uri = 'http://127.0.0.1:5000')
 
-        mfl.set_tracking_uri(f'https://dagshub.com/{repo_owner}/{repo_name}.mlflow')
-
-        # set the experiment name
-        mfl.set_experiment(dagshub_configs['EXPERIMENT_NAME'])
-
-        train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')    
-        
+        train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')            
         X_train: np.ndarray = train_data.iloc[:, :-1].values        
 
         # Binning 'Outcome' column from "y_train" into two categories: 0 and 1
         y_train: pd.arrays.Categorical = pd.cut(train_data.iloc[:, -1].values, 
                          bins = [-float('inf'), 0.5, float('inf')], 
                                  labels = [0, 1], 
-                                 right = False)  
-        
+                                 right = False)          
 
         # Define a nested Objective function and create a Study
         def objective(trial):
@@ -162,14 +108,13 @@ def main() -> None:
                 'min_samples_split': min_samples_split,
                 'min_samples_leaf': min_samples_leaf
             }
-
             model = RandomForestClassifier(**model_params)
 
-            # Perform 3-fold cross-validation and calculate accuracy
+            # Perform 10-fold cross-validation and calculate accuracy
             score = cross_val_score(model,
                                     X_train,
                                     y_train,
-                                    cv = 3,
+                                    cv = 2,                         # cv 10
                                     scoring = 'accuracy').mean()
 
             return score                # Return the accuracy score for Optuna to maximize
@@ -178,7 +123,7 @@ def main() -> None:
             study: Study = optuna.create_study(direction = 'maximize',
                                         sampler = optuna.samplers.TPESampler()
                                         )                    # In order to maximize accuracy
-            study.optimize(objective, n_trials = 5)            # Run 50 trials to find the best hyperparameters
+            study.optimize(objective, n_trials = 2)            # Run 50 trials to find the best hyperparameters
 
             best_params = study.best_trial.params                      
             
@@ -190,66 +135,33 @@ def main() -> None:
                 with mfl.start_run(run_name = f'Experiment: {trial.number}', nested = True) as nested_run:
                     # Log trial hyperparameters and metrics
                     mfl.log_params(trial.params)
-                    mfl.log_metric('trial_value', trial.value)
+                    mfl.log_metric('trial_value', trial.value if trial.value is not None else 0.0)              # Default value when None
 
         best_trial_val: str = f'{study.best_trial.value:.2f}'
         best_params = study.best_trial.params
 
         with mfl.start_run(run_name = 'best_model') as best_model:       
+            best_model_run_id = best_model.info.run_id
+
+            # Save the run Id to a file
+            best_model_run_id_path = get_root_path() / 'src/models/best_model_run_id.txt'
+            os.makedirs(os.path.dirname(best_model_run_id_path), exist_ok = True)
+            with open(best_model_run_id_path, 'w') as f:
+                f.write(best_model_run_id)
+            
+            logger.info(f'Saved best run ID to {best_model_run_id_path}: {best_model_run_id}')
             mfl.log_params(best_params)
             mfl.log_metric('trial_value', float(best_trial_val))
-
-            # best_model = RandomForestClassifier(**study.best_trial.params, 
-            #                                     random_state = 42)
-
-            # # Fit the model to the training data
-            # best_model.fit(X_train, y_train)
-
-            # # Make predictions on the test set
-            # y_pred = best_model.predict(X_test)
-
-            # # get the model signature
-            # signature = mfl.models.infer_signature(model_input = X_train,
-            #                                         model_output = best_model.predict(X_test))
-
-            # # Calculate the metrics: "accuracy", "precision_score", "precision_score" on the test set
-            # accuracy = accuracy_score(y_test, y_pred)
-            # precision = precision_score(y_test, y_pred)
-            # conf_matrix = confusion_matrix(y_test, y_pred)
-
-            # # Start a nested run for each trial
-            # for trial in study.trials:
-            #     with mfl.start_run(run_name = f'Experiment: {trial.number}', nested = True) as nested_run:
-            #         # Log trial hyperparameters and metrics
-            #         mfl.log_params(trial.params)
-            #         mfl.log_metric('trial_value', trial.value)
-
-
-        #     best_params = study.best_trial.params
-        # # print(f'Best hyperparameters: {best_hyper_params}')
-
-        #     train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')    
-        
-        #     X_train: np.ndarray = train_data.iloc[:, :-1].values        
-
-        #     # Binning 'Outcome' column from "y_train" into two categories: 0 and 1
-        #     y_train: pd.arrays.Categorical = pd.cut(train_data.iloc[:, -1].values, 
-        #                  bins = [-float('inf'), 0.5, float('inf')], 
-        #                          labels = [0, 1], 
-        #                          right = False)
-
-        #     rf_model: RandomForestClassifier = train_model(X_train, y_train, best_params)
 
         save_model(model = rf_model,
                    file_path = get_root_path() / 'models/rfclf_model.joblib')
 
     except Exception as exception:
         logger.error('Failed to train the classifier model: %s', exception)
-        print(f'Exception: {exception}')
+        raise
 
 if __name__ == '__main__':
     main()
-
 
 
 """

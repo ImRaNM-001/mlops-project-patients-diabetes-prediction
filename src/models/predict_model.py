@@ -12,9 +12,13 @@ from sklearn.ensemble import RandomForestClassifier
 
 sys.path.append(str(Path(__file__).parent.parent.parent))           # appends system root path as string
 from src.data.data_loader import get_root_path, log_message, load_data
+from src.utils.mlflow_utils import setup_mlflow
 
 # calling the logging function
 logger: logging.Logger = log_message('evaluate_model', 'evaluate_model.log')
+
+# Authenticating with dagshub and reusing same mlflow experiment
+experiment_name: str = setup_mlflow()
 
 def load_model(file_path: Path) -> RandomForestClassifier:
     """
@@ -82,6 +86,24 @@ def save_metrics(metrics: dict[str, float | np.ndarray], file_path: Path) -> Non
         logger.error('Error occurred while saving the metrics: %s', error)
         raise
 
+def save_model_info(run_id: str, model_path: str, file_path: Path) -> None:
+    """
+    Save the model run ID and path to a JSON file
+    """
+    try:
+        model_info = {
+            'run_id': run_id, 
+            'model_path': model_path
+        }
+        
+        with open(file_path, 'w') as json_file:
+            json.dump(model_info, json_file, indent = 2)
+        logger.debug('Model info saved to %s', file_path)
+
+    except Exception as exception:
+        logger.error('Error occurred while saving the model info: %s', exception)
+        raise
+
 def main() -> None:
     try:
         # Load the model to perform predictions
@@ -97,14 +119,57 @@ def main() -> None:
                                  right = False)
 
         metrics = evaluate_model(model, X_test, y_test)
-        with mfl.start_run(run_name = 'best_model') as best_model:       
-            mfl.log_metric(metrics)
+
+        # train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')            
+        # X_train: np.ndarray = train_data.iloc[:, :-1].values          
+
+        # get the model signature
+        # signature = mfl.models.infer_signature(model_input = X_train,
+        #                                       model_output = model.predict(X_test))
+
+        # fetching the run id for existing run_name = 'best_model'
+        best_model_run_id_path = get_root_path() / 'src/models/best_model_run_id.txt'
+        best_model_run_id = None
+        
+        if best_model_run_id_path.exists():
+            with open(best_model_run_id_path, 'r') as txt_file:
+                best_model_run_id = txt_file.read().strip()
+            logger.info(f'Loaded run1 id as {best_model_run_id}')
+
+        if best_model_run_id and experiment_name:
+            with mfl.start_run(run_id = best_model_run_id): 
+                logger.info(f"Loaded run2 ID as {best_model_run_id}")
+                mfl.log_metric('accuracy_score', metrics['accuracy'])
+                mfl.log_metric('precision_score', metrics['precision'])
+
+                with open('confusion_matrix.joblib', 'wb') as conf_matrix_file:
+                    jb.dump(metrics['confusion_matrix'], conf_matrix_file)
+
+                # Log the confusion matrix as an artifact
+                mfl.log_artifact('confusion_matrix.joblib')         
+
+                # Log the model with the signature - already registering the model with "register_model.py"       
+                # mfl.sklearn.log_model(sk_model = best_model,
+                #           artifact_path = 'final_model',
+                #           registered_model_name = 'RandomForestClassifier_model',
+                #           signature = signature)
 
         save_metrics(metrics, get_root_path() / 'reports/metrics.json')
+        save_model_info(best_model_run_id, 
+                        'final_model', 
+                        get_root_path() / 'reports/experiment_info.json')
 
     except Exception as exception:
         logger.error('Model evaluation failed due to: %s', exception)
-        print(f'Exception: {exception}')
+        raise
+
+    finally:
+        try:
+            os.remove(best_model_run_id_path)
+            logger.info(f'Deleted run Id file at {best_model_run_id_path}')
+
+        except Exception as exception:
+            logger.warning(f'Failed to delete run ID file: {exception}')
 
 if __name__ == '__main__':
     main()
