@@ -1,6 +1,6 @@
 # MLOps Project: Patients Diabetes Prediction
 
-This MLOps project aims to perform hyper-parameter tuning and log each experiment using MLflow, DVC, Airflow, and Docker. The project focuses on building a robust machine learning pipeline for predicting diabetes in patients.
+This MLOps project aims to perform hyper-parameter tuning and log each experiment using MLflow, DVC, Flask and Docker. The project focuses on building a robust machine learning pipeline for predicting diabetes in patients.
 
 ## Table of Contents
 - [Project Overview](#project-overview)

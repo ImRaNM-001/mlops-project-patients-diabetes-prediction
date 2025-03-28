@@ -9,8 +9,8 @@ from io import BytesIO
 from unittest.mock import patch, MagicMock
 
 # Add src to path so we can import app
-sys.path.append(str(Path(__file__).parent.parent.resolve()))
-from src.app import app, FEATURE_NAMES
+sys.path.append(str(Path(__file__).parent.parent.resolve()))            
+from flask_app.app import app, FEATURE_NAMES
 
 # Constants for test security
 MAX_TEST_TIMEOUT = 5  # seconds
@@ -49,7 +49,7 @@ def timeout_check():
     execution_time = time.time() - start_time
     assert execution_time < MAX_TEST_TIMEOUT, f'Test took too long: {execution_time}s'
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_home_page(mock_load_model, client):
     """
     Test that the home page loads correctly
@@ -58,7 +58,7 @@ def test_home_page(mock_load_model, client):
     assert response.status_code == 200
     assert b'html' in response.data
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_predict_form_data(mock_load_model, client, mock_model):
     """
     Test prediction with form data
@@ -78,7 +78,7 @@ def test_predict_form_data(mock_load_model, client, mock_model):
     assert b'Diabetic' in response.data
     assert b'20.0' in response.data         # 20% probability
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_predict_form_data_invalid_input(mock_load_model, client, mock_model):
     """
     Test prediction with invalid form data for security
@@ -99,7 +99,7 @@ def test_predict_form_data_invalid_input(mock_load_model, client, mock_model):
     response = client.post('/predict', data = form_data)
     assert response.status_code == 400
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_predict_json_data(mock_load_model, client, mock_model):
     """
     Test prediction with JSON data
@@ -122,7 +122,7 @@ def test_predict_json_data(mock_load_model, client, mock_model):
     assert data['result'] == 'Non-Diabetic'
     assert data['probability'] == 20.0
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_predict_error_handling(mock_load_model, client):
     """
     Test error handling in predict endpoint
@@ -141,7 +141,7 @@ def test_predict_error_handling(mock_load_model, client):
     # Don't expose detailed error messages
     assert b'Test error' not in response.data
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_batch_predict(mock_load_model, client, mock_model):
     """
     Test batch prediction with CSV file
@@ -166,7 +166,7 @@ def test_batch_predict(mock_load_model, client, mock_model):
     assert response.status_code == 200
     assert b'Diabetic' in response.data or b'Non-Diabetic' in response.data
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_batch_predict_file_size_limit(mock_load_model, client, mock_model):
     """
     Test batch prediction with oversized file
@@ -193,7 +193,7 @@ def test_batch_predict_file_size_limit(mock_load_model, client, mock_model):
     
     assert response.status_code == 413  # Request Entity Too Large
     
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_batch_predict_missing_file(mock_load_model, client):
     """
     Test batch prediction with missing file
@@ -205,7 +205,7 @@ def test_batch_predict_missing_file(mock_load_model, client):
     assert 'error' in data
     assert 'No file uploaded' in data['error']
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_batch_predict_missing_columns(mock_load_model, client):
     """
     Test batch prediction with missing columns
@@ -229,7 +229,7 @@ def test_batch_predict_missing_columns(mock_load_model, client):
     assert 'error' in data
     assert 'Missing columns' in data['error']
 
-@patch('src.app.load_model')
+@patch('flask_app.app.load_model')
 def test_batch_predict_malicious_file(mock_load_model, client):
     """
     Test batch prediction with potentially malicious file
