@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+        .result { font-size: 24px; margin: 20px 0; padding: 20px; border-radius: 5px; }
+        .diabetic { background-color: #ffcccc; }
+        .non-diabetic { background-color: #ccffcc; }
+        .probability { font-size: 18px; margin-bottom: 30px; }
+        .back-button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; cursor: pointer; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Prediction Result</h1>
+    
+    <div class="result {% if prediction == 'Diabetic' %}diabetic{% else %}non-diabetic{% endif %}">
+        {{ prediction }}
+    </div>
+    
+    {% if probability is not none %}
+    <div class="probability">
+        Probability of diabetes: {{ probability }}%
+    </div>
+    {% endif %}
+    
+    <a href="/" class="back-button">Make Another Prediction</a>
+</body>
+</html>

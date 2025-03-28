@@ -5,7 +5,7 @@ stages:
     deps:
     - path: data/external/pima-indians-diabetes.csv
       hash: md5
-      md5: 8a3ca1dfd809e39f2b8cbef25f2bd335
+      md5: 939ca4458ca3c894dd7436677c04b942
       size: 23194
     - path: src/data/make_dataset.py
       hash: md5
@@ -34,14 +34,14 @@ stages:
       size: 7056
     - path: data/interim/train_data.csv
       hash: md5
-      md5: 405ce72d43d2dbe5bb41feee0b262a43
+      md5: 09439899b348fc173bac102880667c56
       size: 16332
   data_preprocessing:
     cmd: python src/data/process_dataset.py
     deps:
     - path: data/interim/train_data.csv
       hash: md5
-      md5: 405ce72d43d2dbe5bb41feee0b262a43
+      md5: 09439899b348fc173bac102880667c56
       size: 16332
     - path: src/data/process_dataset.py
       hash: md5
@@ -60,7 +60,7 @@ stages:
       size: 7056
     - path: data/interim/train_data.csv
       hash: md5
-      md5: 405ce72d43d2dbe5bb41feee0b262a43
+      md5: 09439899b348fc173bac102880667c56
       size: 16332
     - path: src/features/build_features.py
       hash: md5
@@ -69,19 +69,19 @@ stages:
     outs:
     - path: data/processed/test_df_processed.csv
       hash: md5
-      md5: 42ad60638c1967381ed8340f94251bdd
-      size: 41133
+      md5: 77869274fffc3f6deb51ea27b033194a
+      size: 41063
     - path: data/processed/train_df_processed.csv
       hash: md5
-      md5: 195a5f0284a78728a983a7b7ff16e7e5
-      size: 93244
+      md5: 9024ce919cf268fcaa3aaff2bc324a4e
+      size: 93077
   model_building:
     cmd: python src/models/train_model.py
     deps:
     - path: data/processed/train_df_processed.csv
       hash: md5
-      md5: 195a5f0284a78728a983a7b7ff16e7e5
-      size: 93244
+      md5: 9024ce919cf268fcaa3aaff2bc324a4e
+      size: 93077
     - path: src/models/train_model.py
       hash: md5
       md5: dda2bf53bc69809b29bcfb26f9357385
@@ -116,40 +116,44 @@ stages:
     outs:
     - path: models/rfclf_model.joblib
       hash: md5
-      md5: 0e453fffb947eb0abe917618f9d19fef
-      size: 697449
+      md5: 44e30f4245d901784abfa3cf8e5d8199
+      size: 480329
   model_evaluation:
     cmd: python src/models/predict_model.py
     deps:
     - path: data/processed/test_df_processed.csv
       hash: md5
-      md5: 42ad60638c1967381ed8340f94251bdd
-      size: 41133
+      md5: 77869274fffc3f6deb51ea27b033194a
+      size: 41063
+    - path: data/processed/train_df_processed.csv
+      hash: md5
+      md5: 9024ce919cf268fcaa3aaff2bc324a4e
+      size: 93077
     - path: models/rfclf_model.joblib
       hash: md5
-      md5: 0e453fffb947eb0abe917618f9d19fef
-      size: 697449
+      md5: 44e30f4245d901784abfa3cf8e5d8199
+      size: 480329
     - path: src/models/predict_model.py
       hash: md5
-      md5: fc4855fd80b21b838a00d989bc11650f
-      size: 6753
+      md5: df3d7e84decdc6dbfa02c96e65cdc352
+      size: 6611
     outs:
     - path: reports/experiment_info.json
       hash: md5
-      md5: d65a03f13f8909f426917b9d66699917
+      md5: 6c42039a629beed87472dfb407861a5e
       size: 81
     - path: reports/metrics.json
       hash: md5
-      md5: ccdcee45b2d8cbbb9349c3a93f693940
+      md5: 543411f0def4f370d9548534a173df99
       size: 164
   model_registration:
     cmd: python src/models/register_model.py
     deps:
     - path: reports/experiment_info.json
       hash: md5
-      md5: d65a03f13f8909f426917b9d66699917
+      md5: 6c42039a629beed87472dfb407861a5e
       size: 81
     - path: src/models/register_model.py
       hash: md5
-      md5: bd3f9e582b2d0fa45de9c8875cb9f025
-      size: 2913
+      md5: 5be2dcaf18126b7a8647161d352ea8f4
+      size: 2914

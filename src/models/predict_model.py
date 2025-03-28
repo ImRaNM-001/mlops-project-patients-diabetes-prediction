@@ -6,6 +6,7 @@ import joblib as jb
 import numpy as np
 import pandas as pd
 import mlflow as mfl
+import mlflow.sklearn
 from pathlib import Path
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
@@ -120,12 +121,12 @@ def main() -> None:
 
         metrics = evaluate_model(model, X_test, y_test)
 
-        # train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')            
-        # X_train: np.ndarray = train_data.iloc[:, :-1].values          
+        train_data: pd.Dataframe = load_data(get_root_path() / 'data/processed/train_df_processed.csv')            
+        X_train: np.ndarray = train_data.iloc[:, :-1].values          
 
         # get the model signature
-        # signature = mfl.models.infer_signature(model_input = X_train,
-        #                                       model_output = model.predict(X_test))
+        signature = mfl.models.infer_signature(model_input = X_train,
+                                              model_output = model.predict(X_test))
 
         # fetching the run id for existing run_name = 'best_model'
         best_model_run_id_path = get_root_path() / 'src/models/best_model_run_id.txt'
@@ -148,11 +149,10 @@ def main() -> None:
                 # Log the confusion matrix as an artifact
                 mfl.log_artifact('confusion_matrix.joblib')         
 
-                # Log the model with the signature - already registering the model with "register_model.py"       
-                # mfl.sklearn.log_model(sk_model = best_model,
-                #           artifact_path = 'final_model',
-                #           registered_model_name = 'RandomForestClassifier_model',
-                #           signature = signature)
+                # Log the model with the signature
+                mlflow.sklearn.log_model(sk_model = model,
+                          artifact_path = 'final_model',
+                          signature = signature)
 
         save_metrics(metrics, get_root_path() / 'reports/metrics.json')
         save_model_info(best_model_run_id, 
@@ -173,4 +173,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-

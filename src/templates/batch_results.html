@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Batch Prediction Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .summary {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .summary h2 {
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .diabetic {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .non-diabetic {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Batch Prediction Results</h1>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p><strong>Total records:</strong> {{ summary.total_records }}</p>
+        <p><strong>Diabetic patients:</strong> {{ summary.diabetic_count }} ({{ summary.percent_diabetic }}%)</p>
+        <p><strong>Non-diabetic patients:</strong> {{ summary.non_diabetic_count }} ({{ 100 - summary.percent_diabetic }}%)</p>
+    </div>
+    
+    <div class="controls">
+        <a href="/" class="back-btn">Back to Prediction</a>
+        
+        <button class="download-btn" onclick="downloadCSV()">Download Complete Results (CSV)</button>
+    </div>
+    
+    <h2>Results Preview</h2>
+    <p>Displaying {{ displayed_rows }} of {{ total_rows }} records</p>
+    
+    <table>
+        <thead>
+            <tr>
+                {% for column in df.columns %}
+                <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for _, row in df.iterrows() %}
+            <tr>
+                {% for col in df.columns %}
+                    {% if col == 'Result' %}
+                        <td class="{% if row[col] == 'Diabetic' %}diabetic{% else %}non-diabetic{% endif %}">
+                            {{ row[col] }}
+                        </td>
+                    {% else %}
+                        <td>{{ row[col] }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <script>
+        function downloadCSV() {
+            const csvContent = `{{ csv_data|safe }}`;
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'predictions.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
