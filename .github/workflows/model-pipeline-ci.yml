@@ -24,6 +24,7 @@ env:
   PYTHON_VERSION: '3.12'
   CACHE_KEY: ${{ github.sha }}
   DVC_REMOTE_NAME: origin
+  DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
 jobs:
   run-pipeline-and-test:
