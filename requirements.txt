@@ -236,7 +236,7 @@ tinycss2==1.4.0
 tokenize_rt==6.1.0
 tomli==2.2.1
 tomlkit==0.13.2
-torch==2.5.1+cpu
+torch==2.5.1
 tornado==6.4.2
 tqdm==4.67.1
 traitlets==5.14.3
