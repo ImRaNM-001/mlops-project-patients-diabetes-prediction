@@ -8,6 +8,7 @@ This MLOps project aims to perform hyper-parameter tuning and log each experimen
 - [Project Structure](#project-structure)
 - [Setup and Installation](#setup-and-installation)
 - [Usage](#usage)
+- [Model Pipeline Execution](#model-pipeline-execution)
 - [Experiments Tracking](#experiments-tracking)
 - [Data Versioning](#data-versioning)
 - [Dockerization](#dockerization)
@@ -99,7 +100,7 @@ The goal of this project is to build a machine learning model to predict diabete
     
 5. **Install DVC**:
     ```sh
-   pip install dvc
+   pip3 install dvc
 6. **Install Docker**: 
     ```sh
     To install Docker on your machine, follow the instructions on the,
@@ -132,7 +133,37 @@ The goal of this project is to build a machine learning model to predict diabete
 3. **Build and run the Docker container**:
     ```sh   
     docker build -t mlops-project-patients-diabetes-prediction:v1 .
-    docker run -p 5000:5000 mlops-project-patients-diabetes-prediction:v1           
+
+    docker run -p 5000:5000 mlops-project-patients-diabetes-prediction:v1      
+## Model Pipeline Execution
+
+1. **Ingest and process the data** (required only if data file do not exist in project structure):
+   ```sh
+   python3 src/data/make_dataset.py
+   ```
+
+2. **Run the ML pipeline using DVC**:
+   ```sh
+   dvc repro
+   ```
+   > **Note**: After running this command, a processed dataset file will be created at `data/processed/test_df_processed.csv`. This file can be used by the Flask app to make predictions.
+
+3. **Make predictions using the Flask app**:
+   
+   * **Option 1**: Start the Flask application directly:
+     ```sh
+     python3 flask_app/app.py
+     ```
+     Access the application at http://127.0.0.1:5000
+
+   * **Option 2**: Use the Docker container as described in the setup section:
+     ```sh
+     docker build -t mlops-project-patients-diabetes-prediction:v1 .
+
+     docker run -p 5000:5000 mlops-project-patients-diabetes-prediction:v1
+     ```
+     This will run the Flask app inside the container and expose it on port 5000.
+
 ## Experiments Tracking
     . Use MLflow to track experiments, log metrics, and manage models.
     
@@ -158,6 +189,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - **Project Structure**: Outlines the directory structure of the project.
 - **Setup and Installation**: Provides step-by-step instructions for setting up the project.
 - **Usage**: Explains how to run the MLflow server, DVC commands, Airflow, and Docker container.
+- **Model Pipeline Execution**: Provides instructions for data ingestion, ML pipeline execution, and prediction using Flask app.
 - **Experiments Tracking**: Describes how to use MLflow for tracking experiments.
 - **Data Versioning**: Describes how to use DVC for data versioning.
 - **Dockerization**: Describes how to use Docker for containerization.

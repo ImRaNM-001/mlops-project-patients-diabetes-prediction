@@ -135,11 +135,10 @@ def main() -> None:
         if best_model_run_id_path.exists():
             with open(best_model_run_id_path, 'r') as txt_file:
                 best_model_run_id = txt_file.read().strip()
-            logger.info(f'Loaded run1 id as {best_model_run_id}')
 
         if best_model_run_id and experiment_name:
             with mfl.start_run(run_id = best_model_run_id): 
-                logger.info(f"Loaded run2 ID as {best_model_run_id}")
+                logger.info(f'Loaded run ID as {best_model_run_id}')
                 mfl.log_metric('accuracy_score', metrics['accuracy'])
                 mfl.log_metric('precision_score', metrics['precision'])
 

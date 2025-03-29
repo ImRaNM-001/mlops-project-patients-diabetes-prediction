@@ -53,6 +53,7 @@ mlflow.db
 *.dvc
 
 # Jupyter notebooks (if not needed in container)
+notebooks/
 *.ipynb
 .ipynb_checkpoints/
 
@@ -60,8 +61,7 @@ mlflow.db
 *.pkl
 *.model
 /models/
-/data/raw/
-/data/processed/
+/data/
 
 # Docker and CI/CD related files
 docker-compose*
@@ -73,3 +73,5 @@ docker-compose*
 docs/
 *.md
 LICENSE
+
+reports/

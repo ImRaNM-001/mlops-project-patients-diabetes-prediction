@@ -18,19 +18,8 @@ COPY flask_app/app_requirements.txt .
 RUN pip3 install --no-cache-dir -r app_requirements.txt && \
     rm app_requirements.txt
 
-# Create necessary directories for source files
-RUN mkdir -p ./flask_app/templates ./src/data ./src/utils ./config && \
-    touch ./src/__init__.py ./src/data/__init__.py ./src/utils/__init__.py
-
-# Copy configuration files
-COPY params.yaml .
-COPY config/dagshub_config.yaml ./config/
-
-# Copy application code and templates
-COPY flask_app/app.py ./flask_app/ 
-COPY flask_app/templates/ ./flask_app/templates/ 
-COPY src/data/data_loader.py ./src/data/ 
-COPY src/utils/mlflow_utils.py ./src/utils/ 
+# Copy application code
+COPY . .
 
 # Create non-root user for security and set appropriate permissions
 RUN groupadd -r appuser && useradd -r -g appuser appuser && \
