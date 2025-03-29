@@ -40,3 +40,36 @@ build/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# MLflow-specific artifacts
+mlruns/
+outputs/
+mlflow.db
+
+# DVC files if using DVC
+.dvc/
+/dvc.lock
+/dvc.yaml
+*.dvc
+
+# Jupyter notebooks (if not needed in container)
+*.ipynb
+.ipynb_checkpoints/
+
+# Models and data files (unless specifically needed)
+*.pkl
+*.model
+/models/
+/data/raw/
+/data/processed/
+
+# Docker and CI/CD related files
+docker-compose*
+.dockerignore
+.github/
+.gitlab-ci.yml
+
+# Documentation
+docs/
+*.md
+LICENSE
