@@ -2,7 +2,7 @@ name: MLOps project CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, feature/ci-run ]
+    branches: [ main, feature-ci-run ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
