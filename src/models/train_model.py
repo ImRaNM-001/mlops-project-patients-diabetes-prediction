@@ -123,7 +123,7 @@ def main() -> None:
             study: Study = optuna.create_study(direction = 'maximize',
                                         sampler = optuna.samplers.TPESampler()
                                         )                    # In order to maximize accuracy
-            study.optimize(objective, n_trials = 2)            # Run 50 trials to find the best hyperparameters
+            study.optimize(objective, n_trials = 50)            # Run 50 trials to find the best hyperparameters
 
             best_params = study.best_trial.params                      
             

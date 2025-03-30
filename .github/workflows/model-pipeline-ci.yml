@@ -2,7 +2,7 @@ name: MLOps project CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]          # test multiple branches [ main, feature-ci-run ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -20,10 +20,11 @@ on:
 
 env:
   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: 'mlops-project-patients-diabetes-prediction'
   PYTHON_VERSION: '3.12'
   CACHE_KEY: ${{ github.sha }}
   DVC_REMOTE_NAME: origin
+  DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
 
 jobs:
   run-pipeline-and-test:
@@ -72,7 +73,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest -vs --cov=src tests/
+          pytest -vs --cov=src --cov-report=xml:coverage.xml tests/
         env:
           PYTHONPATH: ${{ github.workspace }}
 
@@ -81,6 +82,7 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
+          if-no-files-found: warn  # This is actually the default, but making it explicit
 
   # security-scan:
   #   name: Security Scan
@@ -156,6 +158,11 @@ jobs:
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
           echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_OUTPUT
           echo "json={\"date\":\"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\"}" >> $GITHUB_OUTPUT
+
+      # - name: Set lowercase image name
+      #   run: |
+      #     REPO_NAME_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+      #     echo "IMAGE_NAME=${REPO_NAME_LOWERCASE}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
