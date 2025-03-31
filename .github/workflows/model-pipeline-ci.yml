@@ -67,8 +67,15 @@ jobs:
         run: |
           python3 src/data/make_dataset.py
           dvc repro
-          dvc commit
-          dvc push
+
+      - name: Push the data to DVC remote
+        env:
+          DVC_ACCESS_KEY: ${{ secrets.DVC_ACCESS_KEY }}
+        run: |
+          dvc remote modify origin --local access_key_id "$DVC_ACCESS_KEY"
+          dvc remote modify origin --local secret_access_key "$DVC_ACCESS_KEY"
+          dvc commit || echo "No changes to commit"
+          dvc push || { echo "DVC push failed"; exit 1; }
 
       # - name: Lint with flake8
       #   run: |

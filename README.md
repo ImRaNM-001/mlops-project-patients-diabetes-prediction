@@ -123,6 +123,10 @@ The goal of this project is to build a machine learning model to predict diabete
         dvc remote add origin s3://dvc
         dvc remote modify origin endpointurl https://dagshub.com/ImRaNM-001/mlflow-experiment-hp-tuning.s3
 
+    . Next, Setup credentials
+        dvc remote modify origin --local access_key_id "your_token"
+        dvc remote modify origin --local secret_access_key "your_token"
+
     . View list of remotes.
         dvc remote list
 
