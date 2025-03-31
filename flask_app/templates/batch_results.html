@@ -89,8 +89,10 @@
         <thead>
             <tr>
                 {% for column in df.columns %}
-                <th>{{ column }}</th>
-                {% endfor %}
+                {% if not column.startswith('Unnamed') %}
+                    <th>{{ column }}</th>
+                {% endif %}
+            {% endfor %}
             </tr>
         </thead>
         <tbody>

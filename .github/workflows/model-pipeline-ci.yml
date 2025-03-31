@@ -2,7 +2,7 @@ name: MLOps project CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]          # test multiple branches [ main, feature-ci-run ]
+    branches: [ main, feature-ci-changes ]          # test multiple branches [ main, feature-ci-run ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -17,6 +17,11 @@ on:
         type: choice
         options:
           - staging
+      force_build:
+        description: 'Force build even without code changes'
+        required: false
+        type: boolean
+        default: false
 
 env:
   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
@@ -62,6 +67,8 @@ jobs:
         run: |
           python3 src/data/make_dataset.py
           dvc repro
+          dvc commit
+          dvc push
 
       # - name: Lint with flake8
       #   run: |
@@ -133,7 +140,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check for app code changes
+        id: check_changes
+        run: |
+          if [[ "${{ github.event.inputs.force_build }}" == "true" ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Force build was enabled by user, proceeding with Docker build.."
+          else
+            git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "flask_app/" && echo "has_changes=true" >> $GITHUB_OUTPUT || echo "No changes detected in flask_app/"
+          fi
+      
+      - name: Skip build message
+        if: ${{ !steps.check_changes.outputs.has_changes }}
+        run: |
+          echo "Since no changes in flask_app directory, skipping Docker build and push"
+
       - name: Set up Docker Buildx
+        if: ${{ steps.check_changes.outputs.has_changes == 'true' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Cache Docker layers
@@ -165,6 +188,7 @@ jobs:
       #     echo "IMAGE_NAME=${REPO_NAME_LOWERCASE}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
+        if: ${{ steps.check_changes.outputs.has_changes == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .

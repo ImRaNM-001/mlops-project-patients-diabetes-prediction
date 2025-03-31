@@ -162,6 +162,10 @@ def batch_predict():
         
         # Read the CSV file
         df = pd.read_csv(file)
+
+        # Clean up the dataframe: drop columns with all NaN values or empty columns
+        df = df.dropna(axis = 1, how = 'all')           # Drop columns that are all NaN
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]    # Drop unnamed columns
         
         # Ensure the dataframe has the expected columns
         missing_columns = [col for col in FEATURE_NAMES if col not in df.columns]
