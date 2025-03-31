@@ -111,7 +111,8 @@ The goal of this project is to build a machine learning model to predict diabete
     ```sh
    mlflow ui
 
-   . Access the MLflow UI at http://127.0.0.1:5000.
+   . Access the MLflow UI at `http://<host-url>:5000` or, 
+        locally at http://127.0.0.1:5000.
    
 2. **Run DVC commands**:
     ```sh   
@@ -122,11 +123,21 @@ The goal of this project is to build a machine learning model to predict diabete
         dvc remote add origin s3://dvc
         dvc remote modify origin endpointurl https://dagshub.com/ImRaNM-001/mlflow-experiment-hp-tuning.s3
 
+    . Next, Setup credentials
+        dvc remote modify origin --local access_key_id "your_token"
+        dvc remote modify origin --local secret_access_key "your_token"
+
     . View list of remotes.
         dvc remote list
 
     . Pull data and models.
         dvc pull -r origin
+
+    . View what folders are tracked by dvc
+        dvc list --dvc-only .
+
+    . View what files are tracked by dvc
+        dvc list -R --dvc-only .
 
     . Pull data and models.
         dvc push -r origin
@@ -146,7 +157,7 @@ The goal of this project is to build a machine learning model to predict diabete
    ```sh
    dvc repro
    ```
-   > **Note**: After running this command, a processed dataset file will be created at `data/processed/test_df_processed.csv`. This file can be used by the Flask app to make predictions.
+   > **Note**: After running this command, a processed dataset file will be created at `data/processed/test_df_processed.csv`. This file (with the **Outcome** column removed) can be used by the Flask app to make predictions.
 
 3. **Make predictions using the Flask app**:
    
@@ -154,7 +165,9 @@ The goal of this project is to build a machine learning model to predict diabete
      ```sh
      python3 flask_app/app.py
      ```
-     Access the application at http://127.0.0.1:5000
+     Access the application at `http://<host-url>:5000` or locally at http://127.0.0.1:5000
+     
+     ![alt text](images/app_predictions.png)     
 
    * **Option 2**: Use the Docker container as described in the setup section:
      ```sh
@@ -168,6 +181,9 @@ The goal of this project is to build a machine learning model to predict diabete
     . Use MLflow to track experiments, log metrics, and manage models.
     
     . Access the MLflow UI to visualize experiment results and compare models.
+    
+![alt text](images/mlflow_runs_compare.png)
+![alt text](images/mlflow_compare_models.png)
     
 ## Data Versioning
     . Use DVC to version control data and manage data pipelines.

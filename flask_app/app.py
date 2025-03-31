@@ -7,7 +7,7 @@ import pandas as pd
 import mlflow as mfl
 import joblib as jb
 from pathlib import Path
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify 
 
 sys.path.append(str(Path(__file__).parent.parent))           # appends system root path as string      
 from src.data.data_loader import get_root_path, log_message, load_params
@@ -162,6 +162,10 @@ def batch_predict():
         
         # Read the CSV file
         df = pd.read_csv(file)
+
+        # Clean up the dataframe: drop columns with all NaN values or empty columns
+        df = df.dropna(axis = 1, how = 'all')           # Drop columns that are all NaN
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]    # Drop unnamed columns
         
         # Ensure the dataframe has the expected columns
         missing_columns = [col for col in FEATURE_NAMES if col not in df.columns]

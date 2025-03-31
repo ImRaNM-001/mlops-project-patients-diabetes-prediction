@@ -114,7 +114,7 @@ def main() -> None:
             score = cross_val_score(model,
                                     X_train,
                                     y_train,
-                                    cv = 2,                         # cv 10
+                                    cv = 10,                         # cv 10
                                     scoring = 'accuracy').mean()
 
             return score                # Return the accuracy score for Optuna to maximize

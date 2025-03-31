@@ -1,10 +1,7 @@
 [core]
     remote = origin
-
 ['remote "dev_local"']
     url = ../data/dvc_local
-    
 ['remote "origin"']
     url = s3://dvc
     endpointurl = https://dagshub.com/ImRaNM-001/mlflow-experiment-hp-tuning.s3
-
